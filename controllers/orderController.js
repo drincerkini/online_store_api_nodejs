@@ -21,3 +21,41 @@ exports.getOrders = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 }
+
+// PUT
+exports.updateOrder = async (req, res) => {
+    const orderId = req.params.id;
+    const updatedOrderData = req.body;
+
+    try{
+        const updatedOrder = await Order.findByIdAndUpdate(orderId, updatedOrderData, {
+            new: true,
+            runValidators: true
+        }).populate('category_id products.product_id');
+
+        if (!updatedOrder) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        res.json(updatedOrder);
+    }catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+// DELETE
+exports.deleteOrder = async (req, res) => {
+    const orderId = req.params.id;
+
+    try{
+        const deletedOrder = await Order.findByIdAndDelete(orderId);
+
+        if(!deletedOrder){
+            return res.status(404).json({error: "Order not found!"});
+        }
+
+        res.json({message: 'Order deleted successfuly.'});
+    }catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
